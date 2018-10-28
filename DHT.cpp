@@ -9,6 +9,7 @@ written by Adafruit Industries
 #define MIN_INTERVAL 2000
 
 DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
+  (void)(count);
   _pin = pin;
   _type = type;
   #ifdef __AVR
@@ -71,6 +72,7 @@ float DHT::convertFtoC(float f) {
 
 float DHT::readHumidity(bool force) {
   float f = NAN;
+  (void)(force);
   if (read()) {
     switch (_type) {
     case DHT11:
@@ -123,8 +125,8 @@ float DHT::computeHeatIndex(float temperature, float percentHumidity, bool isFah
 boolean DHT::read(bool force) {
   // Check if sensor was read less than two seconds ago and return early
   // to use last reading.
-  uint32_t currenttime = millis();
-  if (!force && ((currenttime - _lastreadtime) < 2000)) {
+  const uint32_t currenttime = millis();
+  if ( !force && (currenttime < (_lastreadtime+2000)) ) {
     return _lastresult; // return last correct measurement
   }
   _lastreadtime = currenttime;
@@ -181,7 +183,7 @@ boolean DHT::read(bool force) {
     // 1 (high state cycle count > low state cycle count). Note that for speed all
     // the pulses are read into a array and then examined in a later step.
     for (int i=0; i<80; i+=2) {
-      cycles[i]   = expectPulse(LOW);
+      cycles[i+0] = expectPulse(LOW);
       cycles[i+1] = expectPulse(HIGH);
     }
   } // Timing critical code is now complete.
@@ -189,8 +191,8 @@ boolean DHT::read(bool force) {
   // Inspect pulses and determine which ones are 0 (high state cycle count < low
   // state cycle count), or 1 (high state cycle count > low state cycle count).
   for (int i=0; i<40; ++i) {
-    uint32_t lowCycles  = cycles[2*i];
-    uint32_t highCycles = cycles[2*i+1];
+    const uint32_t lowCycles  = cycles[2*i];
+    const uint32_t highCycles = cycles[2*i+1];
     if ((lowCycles == 0) || (highCycles == 0)) {
       DEBUG_PRINTLN(F("Timeout waiting for pulse."));
       _lastresult = false;

@@ -26,7 +26,7 @@ DHT_Unified::DHT_Unified(uint8_t pin, uint8_t type, uint8_t count, int32_t tempS
   _type(type),
   _temp(this, tempSensorId),
   _humidity(this, humiditySensorId)
-{}
+{ (void)(count); }
 
 void DHT_Unified::begin() {
   _dht.begin();
