@@ -69,13 +69,15 @@ void DHT::begin(bool oneWire) {
     return;
   }
 
+  _address = 0x0;
+
   // set up the pins!
   pinMode(_pin, INPUT_PULLUP);
   // Using this value makes sure that millis() - lastreadtime will be
   // >= MIN_INTERVAL right away. Note that this assignment wraps around,
   // but so will the subtraction.
   _lastreadtime = -MIN_INTERVAL;
-  DEBUG_PRINT("Max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
+  DEBUG_PRINT("[OneWire] Max clock cycles: "); DEBUG_PRINTLN(_maxcycles, DEC);
 }
 
 void DHT::begin(uint8_t sda, uint8_t scl) {
@@ -85,8 +87,7 @@ void DHT::begin(uint8_t sda, uint8_t scl) {
       break;
 
     default:
-      _address = 0x0;
-      begin();
+      begin(true);
       return;
   }
   
@@ -96,6 +97,7 @@ void DHT::begin(uint8_t sda, uint8_t scl) {
     Wire.begin(sda, scl);
   }
   _lastreadtime = -MIN_INTERVAL;
+  DEBUG_PRINTLN("[TwoWire] Begin");
 }
 
 //boolean isFahrenheit: True == Fahrenheit; False == Celcius
