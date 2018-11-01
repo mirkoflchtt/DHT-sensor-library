@@ -139,8 +139,8 @@ float DHT::convertFtoC(float f) {
 
 float DHT::readHumidity(bool force) {
   float f = NAN;
-  (void)(force);
-  if (read()) {
+
+  if (read(force)) {
     switch (_type) {
     case DHT11:
       f = data[0];
@@ -376,6 +376,11 @@ uint32_t DHT::expectOneWirePulse(const uint8_t level) {
   #endif
 
   return count;
+}
+
+bool DHT::loop(void)
+{
+  return true;
 }
 
 #undef MIN_INTERVAL

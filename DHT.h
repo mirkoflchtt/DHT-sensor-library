@@ -50,6 +50,8 @@ public:
   float computeHeatIndex(float temp, float percentHumidity, bool isFahrenheit=true);
   float readHumidity(bool force=false);
 
+  bool  loop(void);
+
 private:
   uint8_t data[MAX_BYTES_READ];
   uint8_t _pin;
