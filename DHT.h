@@ -72,7 +72,7 @@ private:
 
   bool  readTwoWireRegisters(uint8_t startAddress, uint8_t numBytes);
 
-  uint32_t expectOneWirePulse(const uint8_t level);
+  uint32_t expectPulse(const bool level);
 };
 
 class InterruptLock {

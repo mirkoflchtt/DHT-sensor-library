@@ -108,7 +108,7 @@ float DHT::readTemperature(bool isFahrenheit, bool force) {
     switch (_type) {
     case DHT11:
       f = data[2];
-      if(isFahrenheit) {
+      if (isFahrenheit) {
         f = convertCtoF(f);
       }
       break;
@@ -116,13 +116,13 @@ float DHT::readTemperature(bool isFahrenheit, bool force) {
     case DHT21:
     case AM2301:
     case AM2320:
-      f = data[2] & 0x7F;
-      f *= 256;
-      f += data[3];
-      f *= (data[2] & 0x80) ? -0.1 : 0.1;
-      if(isFahrenheit) {
+      f = (data[2] & 0x7F) * 256 + data[3];
+      f *= (data[2] & 0x80) ? -0.1f : 0.1f;
+      if (isFahrenheit) {
         f = convertCtoF(f);
       }
+      break;
+    default:
       break;
     }
   }
@@ -130,11 +130,11 @@ float DHT::readTemperature(bool isFahrenheit, bool force) {
 }
 
 float DHT::convertCtoF(float c) {
-  return c * 1.8 + 32;
+  return c * 1.8f + 32;
 }
 
 float DHT::convertFtoC(float f) {
-  return (f - 32) * 0.55555;
+  return (f - 32) * 0.55555f;
 }
 
 float DHT::readHumidity(bool force) {
@@ -197,7 +197,7 @@ bool DHT::read(bool force) {
   // Check if sensor was read less than two seconds ago and return early
   // to use last reading.
   const uint32_t currenttime = millis();
-  if ( !force && (currenttime < (_lastreadtime+MIN_INTERVAL)) ) {
+  if ( (!force) && (currenttime < (_lastreadtime+MIN_INTERVAL)) ) {
     return _lastresult; // return last correct measurement
   }
   _lastreadtime = currenttime;
@@ -222,7 +222,7 @@ bool DHT::readOneWire(void) {
   digitalWrite(_pin, LOW);
   delay(20);
 
-  uint16_t cycles[80];
+  uint32_t cycles[80];
   {
     // Turn off interrupts temporarily because the next sections are timing critical
     // and we don't want any interruptions.
@@ -238,12 +238,12 @@ bool DHT::readOneWire(void) {
 
     // First expect a low signal for ~80 microseconds followed by a high signal
     // for ~80 microseconds again.
-    if (expectOneWirePulse(LOW) == 0) {
+    if (expectPulse(LOW) == 0) {
       DEBUG_PRINTLN(F("Timeout waiting for start signal low pulse."));
       _lastresult = false;
       return _lastresult;
     }
-    if (expectOneWirePulse(HIGH) == 0) {
+    if (expectPulse(HIGH) == 0) {
       DEBUG_PRINTLN(F("Timeout waiting for start signal high pulse."));
       _lastresult = false;
       return _lastresult;
@@ -258,15 +258,15 @@ bool DHT::readOneWire(void) {
     // 1 (high state cycle count > low state cycle count). Note that for speed all
     // the pulses are read into a array and then examined in a later step.
     for (int i=0; i<80; i+=2) {
-      cycles[i+0] = expectOneWirePulse(LOW);
-      cycles[i+1] = expectOneWirePulse(HIGH);
+      cycles[i]   = expectPulse(LOW);
+      cycles[i+1] = expectPulse(HIGH);
     }
   } // Timing critical code is now complete.
 
   // Inspect pulses and determine which ones are 0 (high state cycle count < low
   // state cycle count), or 1 (high state cycle count > low state cycle count).
   for (int i=0; i<40; ++i) {
-    const uint32_t lowCycles  = cycles[2*i+0];
+    const uint32_t lowCycles  = cycles[2*i];
     const uint32_t highCycles = cycles[2*i+1];
     if ((lowCycles == 0) || (highCycles == 0)) {
       DEBUG_PRINTLN(F("Timeout waiting for pulse."));
@@ -289,7 +289,7 @@ bool DHT::readOneWire(void) {
     _lastresult = true;
   }
   else {
-    DEBUG_PRINTLN(F("Checksum failure!"));
+    DEBUG_PRINTLN(F("DHT checksum failure!"));
     _lastresult = false;
   }
   return _lastresult;
@@ -354,7 +354,7 @@ bool DHT::readTwoWire(void) {
 // This is adapted from Arduino's pulseInLong function (which is only available
 // in the very latest IDE versions):
 //   https://github.com/arduino/Arduino/blob/master/hardware/arduino/avr/cores/arduino/wiring_pulse.c
-uint32_t DHT::expectOneWirePulse(const uint8_t level) {
+uint32_t DHT::expectPulse(const bool level) {
   uint32_t count = 0;
   // On AVR platforms use direct GPIO port access as it's much faster and better
   // for catching pulses that are 10's of microseconds in length:
