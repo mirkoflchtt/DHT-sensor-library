@@ -60,7 +60,7 @@ DHT::DHT(uint8_t pin, uint8_t type, uint8_t count) {
   _maxcycles = microsecondsToClockCycles(1000);  // 1 millisecond timeout for
                                                  // reading pulses from DHT sensor.
   // Note that count is now ignored as the DHT reading algorithm adjusts itself
-  // basd on the speed of the processor.
+  // based on the speed of the processor.
 }
 
 void DHT::begin(bool oneWire) {
@@ -191,6 +191,18 @@ float DHT::computeHeatIndex(float temp, float percentHumidity, bool isFahrenheit
   }
 
   return (isFahrenheit) ? hi : convertFtoC(hi);
+}
+
+bool DHT::read(bool force) {
+  // Check if sensor was read less than two seconds ago and return early
+  // to use last reading.
+  const uint32_t currenttime = millis();
+  if ( !force && (currenttime < (_lastreadtime+MIN_INTERVAL)) ) {
+    return _lastresult; // return last correct measurement
+  }
+  _lastreadtime = currenttime;
+
+  return (_address>0x0) ? readTwoWire() : readOneWire();
 }
 
 bool DHT::readOneWire(void) {
@@ -333,18 +345,6 @@ bool DHT::readTwoWire(void) {
   DEBUG_PRINTLN(F("Checksum failure!"));
   _lastresult = false;
   return _lastresult;
-}
-
-bool DHT::read(bool force) {
-  // Check if sensor was read less than two seconds ago and return early
-  // to use last reading.
-  const uint32_t currenttime = millis();
-  if ( !force && (currenttime < (_lastreadtime+MIN_INTERVAL)) ) {
-    return _lastresult; // return last correct measurement
-  }
-  _lastreadtime = currenttime;
-
-  return (_address>0x0) ? readTwoWire() : readOneWire();
 }
 
 // Expect the signal line to be at the specified level for a period of time and
