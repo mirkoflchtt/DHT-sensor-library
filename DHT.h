@@ -32,8 +32,8 @@ written by Adafruit Industries
 #define DHT11 11
 #define DHT22 22
 #define DHT21 21
-#define AM2301 30
-#define AM2320 31
+#define AM2301 31
+#define AM2320 32
 
 #define MAX_BYTES_READ 8
 
