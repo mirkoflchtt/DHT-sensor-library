@@ -71,10 +71,10 @@ class DHT {
   bool _lastresult;
   uint8_t pullTime; // Time (in usec) to pull up data line before reading
 
+  uint32_t expectPulse(bool level);
+  
   bool  read(bool force=false);
   bool  readOneWire(void);
-
-  uint32_t expectPulse(bool level);
 };
 
 /*! 

@@ -341,7 +341,6 @@ bool DHT::readOneWire(void) {
     // Else high cycles are less than (or equal to, a weird case) the 50us low
     // cycle count so this must be a zero.  Nothing needs to be changed in the
     // stored data.
-    data[i/8] |= (highCycles > lowCycles) ? 0x1 : 0x0;
   }
 
   DEBUG_PRINTLN(F("Received from DHT:"));
@@ -360,7 +359,6 @@ bool DHT::readOneWire(void) {
   // Check we read 40 bits and that the checksum matches.
   if (data[4] == ONE_WIRE_CHECKSUM(data[0], data[1], data[2], data[3])) {
     _lastresult = true;
-    return _lastresult;
   } else {
     DEBUG_PRINTLN(F("DHT checksum failure!"));
     _lastresult = false;
