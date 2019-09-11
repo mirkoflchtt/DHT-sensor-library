@@ -59,8 +59,6 @@ class DHT {
    bool  loop(void);
 
  private:
-  bool  read(bool force=false);
-  
   uint8_t data[5];
   uint8_t _pin, _type;
 
@@ -75,11 +73,8 @@ class DHT {
 
   bool  read(bool force=false);
   bool  readOneWire(void);
-  bool  readTwoWire(void);
 
-  bool  readTwoWireRegisters(uint8_t startAddress, uint8_t numBytes);
-
-  uint32_t expectPulse(const bool level);
+  uint32_t expectPulse(bool level);
 };
 
 /*! 
